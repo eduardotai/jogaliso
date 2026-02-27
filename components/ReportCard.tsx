@@ -84,7 +84,7 @@ export function ReportCard({ report }: ReportCardProps) {
         <div className="flex items-center space-x-2">
           <User className="w-4 h-4 text-zinc-400" />
           <span className="text-sm text-zinc-400">
-            {report.profile?.full_name || report.profile?.email || 'Anônimo'}
+            {report.profile?.nickname || report.profile?.full_name || 'Anônimo'}
           </span>
           <span className="text-sm text-zinc-500">
             {formatDate(report.created_at)}

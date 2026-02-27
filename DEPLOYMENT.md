@@ -42,6 +42,7 @@ git push production master
 CREATE TABLE IF NOT EXISTS profiles (
   id UUID REFERENCES auth.users(id) PRIMARY KEY,
   email TEXT NOT NULL,
+  nickname TEXT NOT NULL UNIQUE,
   full_name TEXT,
   bio TEXT,
   avatar_url TEXT,

@@ -15,6 +15,7 @@ export default function ProfilePage() {
   const [success, setSuccess] = useState('')
   const [profile, setProfile] = useState({
     email: '',
+    nickname: '',
     bio: '',
     avatar_url: ''
   })
@@ -45,6 +46,7 @@ export default function ProfilePage() {
         if (profileData) {
           setProfile({
             email: session.user.email || '',
+            nickname: profileData.nickname || '',
             bio: profileData.bio || '',
             avatar_url: profileData.avatar_url || ''
           })
@@ -52,6 +54,7 @@ export default function ProfilePage() {
         } else {
           setProfile({
             email: session.user.email || '',
+            nickname: '',
             bio: '',
             avatar_url: ''
           })
@@ -138,6 +141,7 @@ export default function ProfilePage() {
         .upsert({
           id: session.user.id,
           email: profile.email,
+          nickname: profile.nickname,
           bio: profile.bio,
           avatar_url: avatarUrl,
           updated_at: new Date().toISOString()
@@ -272,6 +276,19 @@ export default function ProfilePage() {
 
           {/* Profile Form */}
           <form onSubmit={handleSaveProfile} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-zinc-300 mb-1">Nickname</label>
+              <input
+                type="text"
+                value={profile.nickname}
+                onChange={(e) => setProfile(prev => ({ ...prev, nickname: e.target.value }))}
+                className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-md text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                placeholder="Seu nickname público"
+                minLength={3}
+                required
+              />
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-zinc-300 mb-1">E-mail</label>
               <input

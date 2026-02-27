@@ -10,6 +10,7 @@ export const dynamic = 'force-dynamic'
 
 export default function Signup() {
   const [email, setEmail] = useState('')
+  const [nickname, setNickname] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -20,6 +21,14 @@ export default function Signup() {
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
+
+    if (!nickname.trim()) {
+      newErrors.nickname = 'Nickname é obrigatório'
+    } else if (nickname.length < 3) {
+      newErrors.nickname = 'Nickname deve ter pelo menos 3 caracteres'
+    } else if (!/^[a-zA-Z0-9_]+$/.test(nickname)) {
+      newErrors.nickname = 'Nickname deve conter apenas letras, números e underscore'
+    }
 
     if (!email.trim()) {
       newErrors.email = 'Email é obrigatório'
@@ -53,11 +62,28 @@ export default function Signup() {
     setLoading(true)
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
       })
       if (error) throw error
+
+      // Criar perfil com nickname se o usuário foi criado
+      if (data.user) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert({
+            id: data.user.id,
+            email: email,
+            full_name: nickname, // Usando full_name para armazenar o nickname
+            nickname: nickname
+          })
+
+        if (profileError) {
+          console.error('Erro ao criar perfil:', profileError)
+          // Não vamos falhar o signup por causa do perfil, apenas logar
+        }
+      }
 
       // Mostrar modal de confirmação em vez de alert
       setShowConfirmationModal(true)
@@ -133,6 +159,33 @@ export default function Signup() {
               </h2>
 
               <form onSubmit={handleEmailSignup} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-zinc-300 mb-1">
+                    Nickname
+                  </label>
+                  <input
+                    type="text"
+                    value={nickname}
+                    onChange={(e) => {
+                      setNickname(e.target.value)
+                      if (errors.nickname) {
+                        setErrors(prev => ({ ...prev, nickname: '' }))
+                      }
+                    }}
+                    className={`w-full px-3 py-3 bg-zinc-800 border rounded-md text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent ${
+                      errors.nickname ? 'border-red-500 focus:ring-red-500' : 'border-zinc-700'
+                    }`}
+                    placeholder="Seu nickname (mín. 3 caracteres)"
+                    required
+                  />
+                  {errors.nickname && (
+                    <p className="text-red-400 text-sm mt-1 flex items-center">
+                      <span className="mr-1">⚠️</span>
+                      {errors.nickname}
+                    </p>
+                  )}
+                </div>
+
                 <div>
                   <label className="block text-sm font-medium text-zinc-300 mb-1">
                     Email

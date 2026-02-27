@@ -73,9 +73,9 @@ export default async function DashboardPage() {
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold text-zinc-100">
-                    {profile.full_name || user.email}
+                    {profile.nickname || profile.full_name || user.email}
                   </h2>
-                  <p className="text-zinc-400">{user.email}</p>
+                  <p className="text-zinc-400">{profile.nickname ? `@${profile.nickname}` : user.email}</p>
                   {profile.bio && (
                     <p className="text-zinc-300 mt-2 max-w-md">{profile.bio}</p>
                   )}

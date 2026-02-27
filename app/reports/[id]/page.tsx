@@ -190,7 +190,7 @@ export default function ReportDetailPage() {
           <div className="flex items-center space-x-4 text-zinc-400">
             <div className="flex items-center space-x-2">
               <User className="w-4 h-4" />
-              <span>{report.profile?.full_name || report.profile?.email || 'Usuário'}</span>
+              <span>{report.profile?.nickname || report.profile?.full_name || 'Usuário'}</span>
             </div>
             <div className="flex items-center space-x-2">
               <Calendar className="w-4 h-4" />
