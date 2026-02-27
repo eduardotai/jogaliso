@@ -32,6 +32,45 @@ git push production master
 
 ## Supabase Configuration
 
+### Criar Tabela Profiles
+1. Acesse [Supabase Dashboard](https://supabase.com/dashboard)
+2. Vá para **SQL Editor** no seu projeto
+3. Execute este comando para criar a tabela profiles:
+
+```sql
+-- Criar tabela profiles se não existir
+CREATE TABLE IF NOT EXISTS profiles (
+  id UUID REFERENCES auth.users(id) PRIMARY KEY,
+  email TEXT,
+  full_name TEXT,
+  bio TEXT,
+  avatar_url TEXT,
+  is_supporter BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+);
+
+-- Habilitar RLS
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+
+-- Políticas RLS para profiles
+CREATE POLICY "Users can view their own profile" ON profiles
+  FOR SELECT USING (auth.uid() = id);
+
+CREATE POLICY "Users can update their own profile" ON profiles
+  FOR UPDATE USING (auth.uid() = id);
+
+CREATE POLICY "Users can insert their own profile" ON profiles
+  FOR INSERT WITH CHECK (auth.uid() = id);
+```
+
+**Se a tabela já existir mas não tiver a coluna bio, execute:**
+
+```sql
+-- Adicionar coluna bio se não existir
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS bio TEXT;
+```
+
 ### Criar Bucket para Avatares
 1. Acesse [Supabase Dashboard](https://supabase.com/dashboard)
 2. Vá para **Storage** no seu projeto
