@@ -330,15 +330,31 @@ export default function SubmitPage() {
       // Upload images first
       const uploadedImageUrls = await uploadImages()
 
+      // Debug: log the data being sent
+      const reportData = {
+        user_id: session.user.id,
+        game: formData.game,
+        cpu: formData.cpu,
+        gpu: formData.gpu,
+        ram_gb: Number(formData.ram_gb),
+        resolution: formData.resolution,
+        preset: formData.preset,
+        tweaks: formData.tweaks || null,
+        fps_avg: Number(formData.fps_avg),
+        fps_1low: Number(formData.fps_1low),
+        stability_note: formData.stability_note || null,
+        images: uploadedImageUrls
+      }
+      console.log('Sending report data:', reportData)
+
       const { error } = await supabase
         .from('reports')
-        .insert([{
-          user_id: session.user.id,
-          ...formData,
-          images: uploadedImageUrls
-        }])
+        .insert([reportData])
 
-      if (error) throw error
+      if (error) {
+        console.error('Supabase error:', error)
+        throw error
+      }
 
       setSuccess(true)
       setTimeout(() => {
