@@ -65,11 +65,14 @@ CREATE POLICY "Users can insert their own profile" ON profiles
   FOR INSERT WITH CHECK (auth.uid() = id);
 ```
 
-**Se a tabela já existir mas não tiver a coluna bio, execute:**
+**Se a tabela já existir, adicione as colunas faltantes:**
 
 ```sql
 -- Adicionar coluna bio se não existir
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS bio TEXT;
+
+-- Adicionar coluna nickname se não existir (IMPORTANTE: obrigatório para novos usuários)
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS nickname TEXT UNIQUE;
 ```
 
 ### Criar Tabela Reports
