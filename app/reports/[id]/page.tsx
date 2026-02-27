@@ -71,9 +71,9 @@ export default function ReportDetailPage() {
         }
 
         console.log('Report data:', reportData)
-        console.log('Report error:', error)
+        console.log('Report error:', reportError)
 
-        if (error) throw error
+        if (reportError) throw reportError
 
         if (fullReportData) {
           console.log('Report found:', fullReportData)
