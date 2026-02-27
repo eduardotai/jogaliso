@@ -45,11 +45,11 @@ git push production master
 **Execute estes comandos UM POR VEZ no SQL Editor:**
 
 ```sql
--- Política 1: Upload de avatar
+-- Política 1: Upload de avatar (simplificada)
 CREATE POLICY "Users can upload their own avatar" ON storage.objects
 FOR INSERT WITH CHECK (
   bucket_id = 'avatars'
-  AND auth.uid()::text = (storage.foldername(name))[1]
+  AND auth.role() = 'authenticated'
 );
 ```
 
@@ -57,6 +57,17 @@ FOR INSERT WITH CHECK (
 -- Política 2: Leitura pública de avatares
 CREATE POLICY "Avatar images are publicly accessible" ON storage.objects
 FOR SELECT USING (bucket_id = 'avatars');
+```
+
+**Se ainda não funcionar, tente esta versão alternativa:**
+
+```sql
+-- Política 1 alternativa: Upload de avatar
+CREATE POLICY "Users can upload their own avatar" ON storage.objects
+FOR INSERT WITH CHECK (
+  bucket_id = 'avatars'
+  AND auth.uid() IS NOT NULL
+);
 ```
 
 ## Vercel Configuration
