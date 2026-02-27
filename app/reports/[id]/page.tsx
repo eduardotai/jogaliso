@@ -33,25 +33,57 @@ export default function ReportDetailPage() {
     const fetchReport = async () => {
       if (!params.id) return
 
+      console.log('Fetching report with ID:', params.id)
+
       try {
-        const { data: reportData, error } = await supabase
+        // First try to get the report
+        const { data: reportData, error: reportError } = await supabase
           .from('reports')
-          .select(`
-            *,
-            profile:profiles(*)
-          `)
+          .select('*')
           .eq('id', params.id)
           .single()
 
+        if (reportError) {
+          console.error('Report not found:', reportError)
+          throw reportError
+        }
+
+        // Then try to get the profile
+        let profileData = null
+        if (reportData.user_id) {
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', reportData.user_id)
+            .single()
+
+          if (profileError) {
+            console.warn('Profile not found for user:', reportData.user_id, profileError)
+          } else {
+            profileData = profile
+          }
+        }
+
+        // Combine report with profile
+        const fullReportData = {
+          ...reportData,
+          profile: profileData
+        }
+
+        console.log('Report data:', reportData)
+        console.log('Report error:', error)
+
         if (error) throw error
 
-        if (reportData) {
-          setReport(reportData)
-          setLikesCount(reportData.likes || 0)
+        if (fullReportData) {
+          console.log('Report found:', fullReportData)
+          console.log('Report profile:', fullReportData.profile)
+          setReport(fullReportData)
+          setLikesCount(fullReportData.likes || 0)
 
           // Check if user can edit (within 2 hours)
-          if (session?.user && reportData.user_id === session.user.id) {
-            const createdAt = new Date(reportData.created_at)
+          if (session?.user && fullReportData.user_id === session.user.id) {
+            const createdAt = new Date(fullReportData.created_at)
             const now = new Date()
             const timeDiff = now.getTime() - createdAt.getTime()
             const twoHours = 2 * 60 * 60 * 1000 // 2 hours in milliseconds
@@ -68,6 +100,7 @@ export default function ReportDetailPage() {
         }
       } catch (error) {
         console.error('Error fetching report:', error)
+        console.error('Error details:', error)
       } finally {
         setLoading(false)
       }
